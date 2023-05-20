@@ -20,13 +20,13 @@ function App() {
     setSelectedCard(card)
   }
   function handleEditProfileClick() {
-    setIsEditProfilePopupOpen(() => !isEditProfilePopupOpen)
+    setIsEditProfilePopupOpen((editProfilePopup) => !editProfilePopup)
   }
   function handleAddPlaceClick() {
-    setIsAddPlacePopupOpen(() => !isAddPlacePopupOpen)
+    setIsAddPlacePopupOpen((addPlacePopup) => !addPlacePopup)
   }
   function handleEditAvatarClick() {
-    setIsEditAvatarPopupOpen(() => !isEditAvatarPopupOpen)
+    setIsEditAvatarPopupOpen((editAvatarPopup) => !editAvatarPopup)
   }
   function closeAllPopups() {
     setIsEditProfilePopupOpen(false)
