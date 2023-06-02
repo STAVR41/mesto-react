@@ -12,7 +12,7 @@ import AddPlacePopup from "./AddPlacePopup";
 
 function App() {
   const [cards, setCards] = useState([]);
-  const [currentUser, setCurrentUser] = useState("");
+  const [currentUser, setCurrentUser] = useState({});
   const [selectedCard, setSelectedCard] = useState({});
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
@@ -20,11 +20,11 @@ function App() {
   const [submitTextButton, setSubmitTextButtton] = useState("");
 
   useEffect(() => {
-    api.getUserInfo()
-      .then(res => setCurrentUser(res))
-      .catch(err => console.log(`Ошибка ${err}`));
-    api.getInitialCards()
-      .then(res => setCards(res))
+    Promise.all([api.getUserInfo(), api.getInitialCards()])
+      .then(([userInfo, cards]) => {
+        setCurrentUser(userInfo)
+        setCards(cards)
+      })
       .catch(err => console.log(`Ошибка ${err}`));
   }, [])
 
