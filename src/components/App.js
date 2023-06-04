@@ -8,6 +8,7 @@ import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import EditProfilePopup from "./EditProfilePopup";
 import EditAvatarPopup from "./EditAvatarPopup";
 import AddPlacePopup from "./AddPlacePopup";
+import DeleteCardPopup from "./DeleteCardPopop";
 
 
 function App() {
@@ -18,6 +19,10 @@ function App() {
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const [submitTextButton, setSubmitTextButtton] = useState("");
+  const [errorMessegeInput, setErrorMessegeInput] = useState({});
+  const [buttonStateForm, setButtonStateForm] = useState(true);
+  const [isDeleteCardPopupOpen, setIsDeleteCardPopupOpen] = useState(false);
+  const [dataCardDelete, setDataCardDelete] = useState({});
 
   useEffect(() => {
     Promise.all([api.getUserInfo(), api.getInitialCards()])
@@ -27,9 +32,18 @@ function App() {
       })
       .catch(err => console.log(`Ошибка ${err}`));
   }, [])
+  useEffect(() => {
+    if (isEditProfilePopupOpen) {
+      setButtonStateForm(false)
+    } else {
+      setErrorMessegeInput({})
+      setButtonStateForm(true)
+    }
+
+  }, [isEditProfilePopupOpen, isAddPlacePopupOpen, isEditAvatarPopupOpen])
 
   function handleCardClick(card) {
-    setSelectedCard(card)
+    setSelectedCard(card);
   }
   function handleEditProfileClick() {
     setSubmitTextButtton("Сохранить")
@@ -47,6 +61,7 @@ function App() {
     setIsEditProfilePopupOpen(false)
     setIsAddPlacePopupOpen(false)
     setIsEditAvatarPopupOpen(false)
+    setIsDeleteCardPopupOpen(false)
     setSelectedCard({})
   }
   function handleCardLike(card) {
@@ -62,9 +77,19 @@ function App() {
     }
   }
   function handleCardDelete(card) {
-    api.deleteCard(card._id)
-      .then(() => setCards((item) => item.filter((elem) => elem._id !== card._id)))
-      .catch(err => console.log(`Ошибка ${err}`));
+    setSubmitTextButtton("Да")
+    setIsDeleteCardPopupOpen((deletePopup) => !deletePopup)
+    setDataCardDelete(card);
+  }
+  function submitDeleteCard() {
+    setSubmitTextButtton("Удаление...")
+    api.deleteCard(dataCardDelete._id)
+      .then(() => {
+        setCards((item) => item.filter((elem) => elem._id !== dataCardDelete._id))
+        closeAllPopups();
+      })
+      .catch(err => console.log(`Ошибка ${err}`))
+      .finally(() => setSubmitTextButtton("Да"))
   }
   function handleUpdateUser(userInfo) {
     setSubmitTextButtton("Сохранение...")
@@ -96,6 +121,15 @@ function App() {
       .catch(err => console.log(`Ошибка ${err}`))
       .finally(() => setSubmitTextButtton("Создать"))
   }
+  function validationForms(form) {
+    if (form.currentTarget.checkValidity()) {
+      setButtonStateForm(false)
+      setErrorMessegeInput({ ...errorMessegeInput, [form.target.name]: "" })
+    } else {
+      setButtonStateForm(true)
+      setErrorMessegeInput({ ...errorMessegeInput, [form.target.name]: form.target.validationMessage })
+    }
+  }
 
   return (
     <div className="wrapper">
@@ -104,10 +138,11 @@ function App() {
           <Header />
           <Main onCardDelete={handleCardDelete} cards={cards} onCardLike={handleCardLike} onCardClick={handleCardClick} onEditProfile={handleEditProfileClick} onAddPlace={handleAddPlaceClick} onEditAvatar={handleEditAvatarClick} />
           <Footer />
-          <EditProfilePopup textLoadingSubmit={submitTextButton} onUpdateUser={handleUpdateUser} isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} />
-          <EditAvatarPopup textLoadingSubmit={submitTextButton} onUpdateAvatar={handleUpdateAvatar} isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} />
-          <AddPlacePopup textLoadingSubmit={submitTextButton} cards={cards} onAddPlace={handleAddPlaceSubmit} isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} />
+          <EditProfilePopup errorMessegeInput={errorMessegeInput} buttonStateForm={buttonStateForm} onValidation={validationForms} textLoadingSubmit={submitTextButton} onUpdateUser={handleUpdateUser} isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} />
+          <EditAvatarPopup errorMessegeInput={errorMessegeInput} buttonStateForm={buttonStateForm} onValidation={validationForms} textLoadingSubmit={submitTextButton} onUpdateAvatar={handleUpdateAvatar} isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} />
+          <AddPlacePopup errorMessegeInput={errorMessegeInput} buttonStateForm={buttonStateForm} onValidation={validationForms} textLoadingSubmit={submitTextButton} cards={cards} onAddPlace={handleAddPlaceSubmit} isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} />
           <ImagePopup onClose={closeAllPopups} name={"img"} card={selectedCard} />
+          <DeleteCardPopup onCardDelete={handleCardDelete} onClose={closeAllPopups} textLoadingSubmit={submitTextButton} isOpen={isDeleteCardPopupOpen} onSubmit={submitDeleteCard} card={dataCardDelete} />
         </CurrentUserContext.Provider>
       </div>
     </div>
