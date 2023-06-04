@@ -11,7 +11,6 @@ function EditProfilePopup({ errorMessegeInput, buttonStateForm, onValidation, te
         setName(currentUser.name)
         setDescription(currentUser.about)
     }, [currentUser, isOpen])
-
     function handleSubmit(e) {
         e.preventDefault();
         onUpdateUser({ name, about: description })

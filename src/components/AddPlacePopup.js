@@ -6,11 +6,9 @@ function AddPlacePopup({ errorMessegeInput, buttonStateForm, onValidation, textL
         name: "",
         link: "",
     })
-
     useEffect(() => {
         setNewCard({ name: "", link: "" })
     }, [isOpen])
-
     function handleSubmit(e) {
         e.preventDefault();
         onAddPlace(newCard)
